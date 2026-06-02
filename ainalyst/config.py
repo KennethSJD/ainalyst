@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, field
-from typing import Final
+from pathlib import Path
+from typing import Any, Final
 
 # ──────────────────────────────────────────────────────────────────────
 # ASX ticker handling
@@ -64,9 +66,24 @@ SECTOR_PEERS: dict[str, list[str]] = {
 }
 
 
+# Normalise yfinance sector names → SECTOR_PEERS keys
+_SECTOR_NAME_ALIASES: dict[str, str] = {
+    "healthcare": "Health Care",
+    "technology": "Information Technology",
+    "consumer cyclical": "Consumer Discretionary",
+    "consumer defensive": "Consumer Staples",
+    "communication": "Communication Services",
+}
+
+
 def peers_for_sector(sector: str) -> list[str]:
     """Return the default peer ticker list for *sector* (case-insensitive match)."""
-    key = next((k for k in SECTOR_PEERS if k.lower() == sector.lower()), None)
+    norm = sector.lower().strip()
+    # Try alias lookup first, then direct match
+    resolved = _SECTOR_NAME_ALIASES.get(norm)
+    if resolved:
+        return SECTOR_PEERS[resolved]
+    key = next((k for k in SECTOR_PEERS if k.lower() == norm), None)
     if key is None:
         raise KeyError(f"Unknown sector '{sector}'. Known: {list(SECTOR_PEERS)}")
     return SECTOR_PEERS[key]
@@ -104,6 +121,37 @@ class DCFAssumptions:
 # ──────────────────────────────────────────────────────────────────────
 
 COMPS_MULTIPLES: Final[list[str]] = ["P/E", "EV/EBITDA", "EV/Sales"]
+
+# ──────────────────────────────────────────────────────────────────────
+# Custom Assumptions Store (per-ticker DCF overrides)
+# ──────────────────────────────────────────────────────────────────────
+
+_ASSUMPTIONS_STORE: Path = Path(__file__).resolve().parent.parent / "data" / "custom_assumptions.json"
+
+
+def load_custom_assumptions(ticker: str) -> dict[str, Any] | None:
+    """Return saved DCF assumptions for *ticker*, or None if not found."""
+    if not _ASSUMPTIONS_STORE.exists():
+        return None
+    store = json.loads(_ASSUMPTIONS_STORE.read_text())
+    norm = ticker.upper().replace(".AX", "")
+    for key in (norm, norm + ".AX"):
+        if key in store:
+            return store[key]
+    return None
+
+
+def save_custom_assumptions(ticker: str, assumptions: dict[str, Any]) -> Path:
+    """Persist custom DCF assumptions for *ticker*. Returns path to store."""
+    _ASSUMPTIONS_STORE.parent.mkdir(parents=True, exist_ok=True)
+    store = json.loads(_ASSUMPTIONS_STORE.read_text()) if _ASSUMPTIONS_STORE.exists() else {}
+    norm = ticker.upper().replace(".AX", "")
+    store[norm] = assumptions
+    _ASSUMPTIONS_STORE.write_text(
+        json.dumps(store, indent=2, sort_keys=True) + "\n"
+    )
+    return _ASSUMPTIONS_STORE
+
 
 # ──────────────────────────────────────────────────────────────────────
 # Reporting

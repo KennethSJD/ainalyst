@@ -81,3 +81,77 @@ class TestFundamentalSnapshot:
         for key in ("enterprise_value", "pe_ratio", "ev_ebitda", "ev_sales",
                      "gross_margin", "operating_margin", "net_margin", "roe"):
             assert key in d
+
+
+class TestHistoricalSnapshots:
+    """Tests for build_historical_snapshots."""
+
+    def test_builds_multiple_periods(self):
+        import pandas as pd
+        from unittest.mock import MagicMock
+        from ainalyst.acquisition import ASXTicker
+        from ainalyst.fundamentals import build_historical_snapshots
+
+        # Create multi-column financial statements
+        inc = pd.DataFrame(
+            {
+                pd.Timestamp("2023-06-30"): [1000, 600, 400, 200, 250, 150, 10, 50],
+                pd.Timestamp("2022-06-30"): [900, 540, 360, 180, 225, 135, 9, 45],
+            },
+            index=[
+                "Total Revenue", "Cost Of Revenue", "Gross Profit",
+                "Operating Income", "EBITDA", "Net Income",
+                "Interest Expense", "Tax Provision",
+            ],
+        )
+        bs = pd.DataFrame(
+            {
+                pd.Timestamp("2023-06-30"): [5000, 2000, 1000, 500, 3000],
+                pd.Timestamp("2022-06-30"): [4500, 1800, 900, 450, 2700],
+            },
+            index=[
+                "Total Assets", "Total Liabilities Net Minority Interest",
+                "Total Debt", "Cash And Cash Equivalents",
+                "Total Equity Gross Minority Interest",
+            ],
+        )
+        cf = pd.DataFrame(
+            {
+                pd.Timestamp("2023-06-30"): [300, 80, 220, 50],
+                pd.Timestamp("2022-06-30"): [270, 72, 198, 45],
+            },
+            index=[
+                "Operating Cash Flow", "Capital Expenditure",
+                "Free Cash Flow", "Depreciation And Amortization",
+            ],
+        )
+
+        mock_ticker = MagicMock(spec=ASXTicker)
+        mock_ticker.symbol = "TST.AX"
+        mock_ticker.company_name = "Test"
+        mock_ticker.sector = "Tech"
+        mock_ticker.income_stmt = inc
+        mock_ticker.balance_sheet = bs
+        mock_ticker.cashflow = cf
+        mock_ticker.shares_outstanding = 100
+        mock_ticker.current_price = 10.0
+        mock_ticker.market_cap = 1000
+        mock_ticker.info = {"currency": "AUD"}
+
+        snapshots = build_historical_snapshots(mock_ticker)
+        assert len(snapshots) == 2
+        assert snapshots[0].total_revenue == 1000
+        assert snapshots[1].total_revenue == 900
+
+    def test_empty_income_returns_empty(self):
+        import pandas as pd
+        from unittest.mock import MagicMock
+        from ainalyst.acquisition import ASXTicker
+        from ainalyst.fundamentals import build_historical_snapshots
+
+        mock_ticker = MagicMock(spec=ASXTicker)
+        mock_ticker.symbol = "EMPTY.AX"
+        mock_ticker.income_stmt = pd.DataFrame()
+
+        snapshots = build_historical_snapshots(mock_ticker)
+        assert snapshots == []

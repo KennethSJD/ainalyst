@@ -1,6 +1,9 @@
 # ── Generated reports (personal analysis runs) ──────────────────────
 reports/*
 !reports/examples/
+
+# ── Fetched market data (regenerate via asx_scraper.py) ──────────────
+asx_directory.csv
 !reports/examples
 # ── Python build & cache artefacts ───────────────────────────────────
 __pycache__/

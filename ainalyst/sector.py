@@ -11,6 +11,7 @@ import pandas as pd
 
 from ainalyst.acquisition import fetch_tickers
 from ainalyst.config import peers_for_sector, SECTOR_PEERS
+from ainalyst.directory import load_directory
 from ainalyst.fundamentals import FundamentalSnapshot, build_snapshots
 
 log = logging.getLogger(__name__)
@@ -66,20 +67,51 @@ class SectorAnalyzer:
         self,
         sector: str,
         tickers: list[str] | None = None,
+        use_directory: bool = False,
+        max_companies: int = 20,
     ) -> SectorSummary:
         """Analyse a single sector.
 
         Parameters
         ----------
         sector : str
-            GICS sector name (must match keys in ``SECTOR_PEERS``).
+            GICS sector name (must match keys in ``SECTOR_PEERS`` or
+            a GICS industry group name from the ASX directory).
         tickers : list[str] | None
-            Override list of tickers; defaults to ``SECTOR_PEERS[sector]``.
+            Override list of tickers; defaults to ``SECTOR_PEERS[sector]``
+            unless ``use_directory=True``.
+        use_directory : bool
+            If True, pull all tickers in this industry group from the full
+            ASX directory instead of the hardcoded ``SECTOR_PEERS`` list.
+        max_companies : int
+            Cap on number of company snapshots to fetch (default 20).
         """
         if tickers is None:
-            tickers = peers_for_sector(sector)
+            if use_directory:
+                tickers = _tickers_from_directory(sector, max_companies)
+                if not tickers:
+                    log.warning(
+                        "No tickers for sector '%s' in directory, falling back to peers",
+                        sector,
+                    )
+                    try:
+                        tickers = peers_for_sector(sector)
+                    except KeyError:
+                        log.warning("No default peers for sector '%s'", sector)
+                        return _empty_summary(sector)
+            else:
+                try:
+                    tickers = peers_for_sector(sector)
+                except KeyError:
+                    log.warning(
+                        "Sector '%s' not in SECTOR_PEERS, trying directory",
+                        sector,
+                    )
+                    tickers = _tickers_from_directory(sector, max_companies)
+                    if not tickers:
+                        return _empty_summary(sector)
 
-        objs = fetch_tickers(tickers)
+        objs = fetch_tickers(tickers[:max_companies])
         snaps = build_snapshots(objs)
         if not snaps:
             log.warning("No valid snapshots for sector '%s'", sector)
@@ -121,6 +153,29 @@ class SectorAnalyzer:
 def _med(df: pd.DataFrame, col: str) -> float | None:
     s = pd.to_numeric(df[col], errors="coerce").dropna()
     return float(s.median()) if not s.empty else None
+
+
+def _tickers_from_directory(sector: str, max_tickers: int = 20) -> list[str]:
+    """Find tickers in a given GICS industry group from the ASX directory."""
+    try:
+        df = load_directory()
+    except Exception as exc:
+        log.warning("Failed to load directory: %s", exc)
+        return []
+    # Case-insensitive partial match on industry name
+    mask = df["industry"].str.contains(sector, case=False, na=False)
+    matched = df[mask].sort_values("market_cap", ascending=False)
+    tickers = [
+        t.replace(".AX", "")
+        for t in matched["ticker"].head(max_tickers)
+    ]
+    log.info(
+        "Directory lookup: '%s' → %d tickers (top %d by market cap)",
+        sector,
+        len(matched),
+        len(tickers),
+    )
+    return tickers
 
 
 def _mn(df: pd.DataFrame, col: str) -> float | None:

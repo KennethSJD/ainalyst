@@ -271,3 +271,102 @@ def build_snapshots(tickers: list[ASXTicker]) -> list[FundamentalSnapshot]:
         except Exception as exc:
             log.warning("Skipping %s: %s", t.symbol, exc)
     return results
+
+
+def build_historical_snapshots(ticker: ASXTicker) -> list[FundamentalSnapshot]:
+    """Build a time-series of snapshots from all available annual columns.
+
+    Parses every column in the income statement, balance sheet, and cash flow
+    statement, producing one :class:`FundamentalSnapshot` per reporting period.
+    Returns list sorted newest-first.
+    """
+    inc = ticker.income_stmt
+    bs = ticker.balance_sheet
+    cf = ticker.cashflow
+
+    if inc.empty:
+        log.warning("No income statement data for %s", ticker.symbol)
+        return []
+
+    snapshots: list[FundamentalSnapshot] = []
+    for col_idx in range(len(inc.columns)):
+        try:
+            snap = _build_snapshot_at_col(ticker, inc, bs, cf, col_idx)
+            if snap.total_revenue > 0:
+                snapshots.append(snap)
+        except Exception as exc:
+            log.debug("Skipping column %d for %s: %s", col_idx, ticker.symbol, exc)
+
+    # Sort by revenue descending (proxy for newest-first since columns are dated)
+    snapshots.sort(key=lambda s: -s.total_revenue)
+    return snapshots
+
+
+def _build_snapshot_at_col(
+    ticker: ASXTicker,
+    inc: pd.DataFrame,
+    bs: pd.DataFrame,
+    cf: pd.DataFrame,
+    col_idx: int,
+) -> FundamentalSnapshot:
+    """Build a snapshot for a specific column index."""
+    revenue = _get_any(inc, _REVENUE_LABELS, col_idx)
+    cogs = _get_any(inc, _COGS_LABELS, col_idx)
+    gross = _get_any(inc, _GROSS_LABELS, col_idx)
+    if gross == 0.0 and revenue > 0:
+        gross = revenue - abs(cogs)
+
+    ebit = _get_any(inc, _EBIT_LABELS, col_idx)
+    ebitda = _get_any(inc, _EBITDA_LABELS, col_idx)
+    depr = _get_any(cf, _DEPR_LABELS, col_idx)
+    if ebitda == 0.0 and ebit != 0.0:
+        ebitda = ebit + abs(depr)
+
+    net_inc = _get_any(inc, _NET_INCOME_LABELS, col_idx)
+    interest = _get_any(inc, _INTEREST_LABELS, col_idx)
+    tax = _get_any(inc, _TAX_LABELS, col_idx)
+
+    total_assets = _get_any(bs, _TOTAL_ASSETS_LABELS, col_idx)
+    total_liab = _get_any(bs, _TOTAL_LIAB_LABELS, col_idx)
+    total_debt = _get_any(bs, _TOTAL_DEBT_LABELS, col_idx)
+    cash = _get_any(bs, _CASH_LABELS, col_idx)
+    equity = _get_any(bs, _EQUITY_LABELS, col_idx)
+    if equity == 0.0 and total_assets > 0:
+        equity = total_assets - total_liab
+
+    ocf = _get_any(cf, _OCF_LABELS, col_idx)
+    capex = _get_any(cf, _CAPEX_LABELS, col_idx)
+    fcf = _get_any(cf, _FCF_LABELS, col_idx)
+    if fcf == 0.0 and ocf != 0.0:
+        fcf = ocf - abs(capex)
+
+    shares = ticker.shares_outstanding or 0.0
+    price = ticker.current_price
+    mcap = ticker.market_cap
+
+    return FundamentalSnapshot(
+        ticker=ticker.symbol,
+        company_name=ticker.company_name,
+        sector=ticker.sector,
+        currency=ticker.info.get("currency", "AUD"),
+        total_revenue=revenue,
+        cost_of_revenue=cogs,
+        gross_profit=gross,
+        operating_income=ebit,
+        ebitda=ebitda,
+        net_income=net_inc,
+        interest_expense=interest,
+        tax_provision=tax,
+        total_assets=total_assets,
+        total_liabilities=total_liab,
+        total_debt=total_debt,
+        cash_and_equivalents=cash,
+        total_equity=equity,
+        operating_cashflow=ocf,
+        capital_expenditure=capex,
+        free_cashflow=fcf,
+        depreciation=depr,
+        shares_outstanding=shares,
+        current_price=price,
+        market_cap=mcap,
+    )

@@ -1,0 +1,404 @@
+{
+  "ANN": {
+    "computation_log": "=================================================================\nDERIVED DCF ASSUMPTIONS \u2014 Computation Log\n=================================================================\n\n  [cost_of_debt_pretax] = 0.0515  (5.15%)\n    Formula:  interest_expense / total_debt\n    Inputs:   interest_expense=41.5000, total_debt=805.6000\n    Note:     Interest expense $42M / Debt $806M\n\n  [cost_of_debt_aftertax] = 0.0361  (3.61%)\n    Formula:  cost_of_debt_pre \u00d7 (1 \u2212 tax_rate)\n    Inputs:   cost_of_debt_pre=0.0515, tax_rate=0.3000\n\n  [beta] = 0.5480  (54.80%)\n    Formula:  yfinance .info['beta']\n    Inputs:   \n    Note:     5-year monthly beta vs ASX200 from Yahoo Finance\n\n  [cost_of_equity] = 0.0731  (7.31%)\n    Formula:  Rf + \u03b2 \u00d7 ERP\n    Inputs:   risk_free_rate=0.0430, beta=0.5480, equity_risk_premium=0.0550\n    Note:     Rf=4.3% (AU 10yr), ERP=5.5% (Damodaran)\n\n  [equity_weight] = 0.8274  (82.74%)\n    Formula:  market_cap / (market_cap + total_debt)\n    Inputs:   market_cap=3.8608, total_debt=0.8056\n    Note:     MCap $3.9B, Debt $0.8B\n\n  [debt_weight] = 0.1726  (17.26%)\n    Formula:  total_debt / (market_cap + total_debt)\n    Inputs:   market_cap=3.8608, total_debt=0.8056\n\n  [wacc] = 0.0667  (6.67%)\n    Formula:  EquityWeight \u00d7 CostEquity + DebtWeight \u00d7 CostDebtAfterTax\n    Inputs:   equity_weight=0.8274, cost_of_equity=0.0731, debt_weight=0.1726, cost_of_debt_aftertax=0.0361\n\n  [return_on_equity] = 0.0696  (6.96%)\n    Formula:  yfinance .info['returnOnEquity'] or net_income/total_equity\n    Inputs:   net_income=101.6000, total_equity=1982.7000\n\n  [payout_ratio] = 0.5343  (53.43%)\n    Formula:  yfinance .info['payoutRatio']\n    Inputs:   \n\n  [sustainable_growth_rate] = 0.0324  (3.24%)\n    Formula:  ROE \u00d7 (1 \u2212 payout_ratio)\n    Inputs:   roe=0.0696, payout_ratio=0.5343\n    Note:     Gordon Growth sustainable rate: how fast equity can grow from retained earnings\n\n  [terminal_growth_rate] = 0.0324  (3.24%)\n    Formula:  min(sustainable_growth_rate, gdp_ceiling)\n    Inputs:   sustainable_growth_rate=0.0324, gdp_ceiling=0.0350\n    Note:     SGR below GDP ceiling \u2014 no cap applied\n\n  [target_operating_margin] = 0.1431  (14.31%)\n    Formula:  yfinance operatingMargins or EBIT/revenue\n    Inputs:   operating_income=109.1000, total_revenue=2003.3000\n    Note:     Actual trailing operating margin = 14.3%\n\n  \u2500\u2500 Result \u2500\u2500\n  WACC                = 0.0667  (6.67%)\n  Terminal Growth     = 0.0324  (3.24%)\n  Target Op. Margin   = 0.1431  (14.31%)\n  \u2500\u2500 Detail \u2500\u2500\n  Cost of Equity      = 0.0731  (7.31%)\n  Cost of Debt (pre)  = 0.0515  (5.15%)\n  Cost of Debt (post) = 0.0361  (3.61%)\n  Equity Weight       = 0.8274  (82.7%)\n  Debt Weight         = 0.1726  (17.3%)\n  Sustainable Growth  = 0.0324  (3.24%)\n=================================================================",
+    "computed_at": "2026-06-02 13:05 UTC",
+    "cost_of_debt_aftertax": 0.036060079443892744,
+    "cost_of_debt_pretax": 0.05151439920556107,
+    "cost_of_equity": 0.07314,
+    "debt_weight": 0.17263674119106198,
+    "equity_weight": 0.827363258808938,
+    "margin": 0.14309,
+    "sources": [
+      {
+        "formula": "interest_expense / total_debt",
+        "inputs": {
+          "interest_expense": 41.5,
+          "total_debt": 805.6
+        },
+        "key": "cost_of_debt_pretax",
+        "note": "Interest expense $42M / Debt $806M",
+        "value": 0.05151439920556107
+      },
+      {
+        "formula": "cost_of_debt_pre \u00d7 (1 \u2212 tax_rate)",
+        "inputs": {
+          "cost_of_debt_pre": 0.05151439920556107,
+          "tax_rate": 0.3
+        },
+        "key": "cost_of_debt_aftertax",
+        "note": "",
+        "value": 0.036060079443892744
+      },
+      {
+        "formula": "yfinance .info['beta']",
+        "inputs": {},
+        "key": "beta",
+        "note": "5-year monthly beta vs ASX200 from Yahoo Finance",
+        "value": 0.548
+      },
+      {
+        "formula": "Rf + \u03b2 \u00d7 ERP",
+        "inputs": {
+          "beta": 0.548,
+          "equity_risk_premium": 0.055,
+          "risk_free_rate": 0.043
+        },
+        "key": "cost_of_equity",
+        "note": "Rf=4.3% (AU 10yr), ERP=5.5% (Damodaran)",
+        "value": 0.07314
+      },
+      {
+        "formula": "market_cap / (market_cap + total_debt)",
+        "inputs": {
+          "market_cap": 3.860845824,
+          "total_debt": 0.8056
+        },
+        "key": "equity_weight",
+        "note": "MCap $3.9B, Debt $0.8B",
+        "value": 0.827363258808938
+      },
+      {
+        "formula": "total_debt / (market_cap + total_debt)",
+        "inputs": {
+          "market_cap": 3.860845824,
+          "total_debt": 0.8056
+        },
+        "key": "debt_weight",
+        "note": "",
+        "value": 0.17263674119106198
+      },
+      {
+        "formula": "EquityWeight \u00d7 CostEquity + DebtWeight \u00d7 CostDebtAfterTax",
+        "inputs": {
+          "cost_of_debt_aftertax": 0.036060079443892744,
+          "cost_of_equity": 0.07314,
+          "debt_weight": 0.17263674119106198,
+          "equity_weight": 0.827363258808938
+        },
+        "key": "wacc",
+        "note": "",
+        "value": 0.06673864335157018
+      },
+      {
+        "formula": "yfinance .info['returnOnEquity'] or net_income/total_equity",
+        "inputs": {
+          "net_income": 101.6,
+          "total_equity": 1982.7
+        },
+        "key": "return_on_equity",
+        "note": "",
+        "value": 0.06964
+      },
+      {
+        "formula": "yfinance .info['payoutRatio']",
+        "inputs": {},
+        "key": "payout_ratio",
+        "note": "",
+        "value": 0.5343
+      },
+      {
+        "formula": "ROE \u00d7 (1 \u2212 payout_ratio)",
+        "inputs": {
+          "payout_ratio": 0.5343,
+          "roe": 0.06964
+        },
+        "key": "sustainable_growth_rate",
+        "note": "Gordon Growth sustainable rate: how fast equity can grow from retained earnings",
+        "value": 0.032431348
+      },
+      {
+        "formula": "min(sustainable_growth_rate, gdp_ceiling)",
+        "inputs": {
+          "gdp_ceiling": 0.035,
+          "sustainable_growth_rate": 0.032431348
+        },
+        "key": "terminal_growth_rate",
+        "note": "SGR below GDP ceiling \u2014 no cap applied",
+        "value": 0.032431348
+      },
+      {
+        "formula": "yfinance operatingMargins or EBIT/revenue",
+        "inputs": {
+          "operating_income": 109.1,
+          "total_revenue": 2003.3
+        },
+        "key": "target_operating_margin",
+        "note": "Actual trailing operating margin = 14.3%",
+        "value": 0.14309
+      }
+    ],
+    "sustainable_growth_rate": 0.032431348,
+    "target_operating_margin": 0.14309,
+    "terminal_growth_rate": 0.032431348,
+    "tgr": 0.032431348,
+    "wacc": 0.06673864335157018
+  },
+  "CSL": {
+    "computation_log": "=================================================================\nDERIVED DCF ASSUMPTIONS \u2014 Computation Log\n=================================================================\n\n  [cost_of_debt_pretax] = 0.0342  (3.42%)\n    Formula:  interest_expense / total_debt\n    Inputs:   interest_expense=393.0000, total_debt=11498.0000\n    Note:     Interest expense $393M / Debt $11498M\n\n  [cost_of_debt_aftertax] = 0.0239  (2.39%)\n    Formula:  cost_of_debt_pre \u00d7 (1 \u2212 tax_rate)\n    Inputs:   cost_of_debt_pre=0.0342, tax_rate=0.3000\n\n  [beta] = 0.1450  (14.50%)\n    Formula:  yfinance .info['beta']\n    Inputs:   \n    Note:     5-year monthly beta vs ASX200 from Yahoo Finance\n\n  [cost_of_equity] = 0.0510  (5.10%)\n    Formula:  Rf + \u03b2 \u00d7 ERP\n    Inputs:   risk_free_rate=0.0430, beta=0.1450, equity_risk_premium=0.0550\n    Note:     Rf=4.3% (AU 10yr), ERP=5.5% (Damodaran)\n\n  [equity_weight] = 0.7940  (79.40%)\n    Formula:  market_cap / (market_cap + total_debt)\n    Inputs:   market_cap=44.3281, total_debt=11.4980\n    Note:     MCap $44.3B, Debt $11.5B\n\n  [debt_weight] = 0.2060  (20.60%)\n    Formula:  total_debt / (market_cap + total_debt)\n    Inputs:   market_cap=44.3281, total_debt=11.4980\n\n  [wacc] = 0.0454  (4.54%)\n    Formula:  EquityWeight \u00d7 CostEquity + DebtWeight \u00d7 CostDebtAfterTax\n    Inputs:   equity_weight=0.7940, cost_of_equity=0.0510, debt_weight=0.2060, cost_of_debt_aftertax=0.0239\n\n  [return_on_equity] = 0.0666  (6.66%)\n    Formula:  yfinance .info['returnOnEquity'] or net_income/total_equity\n    Inputs:   net_income=3002.0000, total_equity=21407.0000\n\n  [payout_ratio] = 0.4549  (45.49%)\n    Formula:  yfinance .info['payoutRatio']\n    Inputs:   \n\n  [sustainable_growth_rate] = 0.0363  (3.63%)\n    Formula:  ROE \u00d7 (1 \u2212 payout_ratio)\n    Inputs:   roe=0.0666, payout_ratio=0.4549\n    Note:     Gordon Growth sustainable rate: how fast equity can grow from retained earnings\n\n  [terminal_growth_rate] = 0.0350  (3.50%)\n    Formula:  min(sustainable_growth_rate, gdp_ceiling)\n    Inputs:   sustainable_growth_rate=0.0363, gdp_ceiling=0.0350\n    Note:     SGR capped at long-term GDP ceiling 3.5%\n\n  [target_operating_margin] = 0.3165  (31.65%)\n    Formula:  yfinance operatingMargins or EBIT/revenue\n    Inputs:   operating_income=2959.0000, total_revenue=15430.0000\n    Note:     Actual trailing operating margin = 31.6%\n\n  \u2500\u2500 Result \u2500\u2500\n  WACC                = 0.0454  (4.54%)\n  Terminal Growth     = 0.0350  (3.50%)\n  Target Op. Margin   = 0.3165  (31.65%)\n  \u2500\u2500 Detail \u2500\u2500\n  Cost of Equity      = 0.0510  (5.10%)\n  Cost of Debt (pre)  = 0.0342  (3.42%)\n  Cost of Debt (post) = 0.0239  (2.39%)\n  Equity Weight       = 0.7940  (79.4%)\n  Debt Weight         = 0.2060  (20.6%)\n  Sustainable Growth  = 0.0363  (3.63%)\n=================================================================",
+    "computed_at": "2026-06-02 12:59 UTC",
+    "cost_of_debt_aftertax": 0.02392590015654896,
+    "cost_of_debt_pretax": 0.03417985736649852,
+    "cost_of_equity": 0.05097499999999999,
+    "debt_weight": 0.20596104188160416,
+    "equity_weight": 0.7940389581183959,
+    "margin": 0.31649,
+    "sources": [
+      {
+        "formula": "interest_expense / total_debt",
+        "inputs": {
+          "interest_expense": 393.0,
+          "total_debt": 11498.0
+        },
+        "key": "cost_of_debt_pretax",
+        "note": "Interest expense $393M / Debt $11498M",
+        "value": 0.03417985736649852
+      },
+      {
+        "formula": "cost_of_debt_pre \u00d7 (1 \u2212 tax_rate)",
+        "inputs": {
+          "cost_of_debt_pre": 0.03417985736649852,
+          "tax_rate": 0.3
+        },
+        "key": "cost_of_debt_aftertax",
+        "note": "",
+        "value": 0.02392590015654896
+      },
+      {
+        "formula": "yfinance .info['beta']",
+        "inputs": {},
+        "key": "beta",
+        "note": "5-year monthly beta vs ASX200 from Yahoo Finance",
+        "value": 0.145
+      },
+      {
+        "formula": "Rf + \u03b2 \u00d7 ERP",
+        "inputs": {
+          "beta": 0.145,
+          "equity_risk_premium": 0.055,
+          "risk_free_rate": 0.043
+        },
+        "key": "cost_of_equity",
+        "note": "Rf=4.3% (AU 10yr), ERP=5.5% (Damodaran)",
+        "value": 0.05097499999999999
+      },
+      {
+        "formula": "market_cap / (market_cap + total_debt)",
+        "inputs": {
+          "market_cap": 44.328091648,
+          "total_debt": 11.498
+        },
+        "key": "equity_weight",
+        "note": "MCap $44.3B, Debt $11.5B",
+        "value": 0.7940389581183959
+      },
+      {
+        "formula": "total_debt / (market_cap + total_debt)",
+        "inputs": {
+          "market_cap": 44.328091648,
+          "total_debt": 11.498
+        },
+        "key": "debt_weight",
+        "note": "",
+        "value": 0.20596104188160416
+      },
+      {
+        "formula": "EquityWeight \u00d7 CostEquity + DebtWeight \u00d7 CostDebtAfterTax",
+        "inputs": {
+          "cost_of_debt_aftertax": 0.02392590015654896,
+          "cost_of_equity": 0.05097499999999999,
+          "debt_weight": 0.20596104188160416,
+          "equity_weight": 0.7940389581183959
+        },
+        "key": "wacc",
+        "note": "",
+        "value": 0.04540393921428328
+      },
+      {
+        "formula": "yfinance .info['returnOnEquity'] or net_income/total_equity",
+        "inputs": {
+          "net_income": 3002.0,
+          "total_equity": 21407.0000000001
+        },
+        "key": "return_on_equity",
+        "note": "",
+        "value": 0.06662
+      },
+      {
+        "formula": "yfinance .info['payoutRatio']",
+        "inputs": {},
+        "key": "payout_ratio",
+        "note": "",
+        "value": 0.45490003
+      },
+      {
+        "formula": "ROE \u00d7 (1 \u2212 payout_ratio)",
+        "inputs": {
+          "payout_ratio": 0.45490003,
+          "roe": 0.06662
+        },
+        "key": "sustainable_growth_rate",
+        "note": "Gordon Growth sustainable rate: how fast equity can grow from retained earnings",
+        "value": 0.0363145600014
+      },
+      {
+        "formula": "min(sustainable_growth_rate, gdp_ceiling)",
+        "inputs": {
+          "gdp_ceiling": 0.035,
+          "sustainable_growth_rate": 0.0363145600014
+        },
+        "key": "terminal_growth_rate",
+        "note": "SGR capped at long-term GDP ceiling 3.5%",
+        "value": 0.035
+      },
+      {
+        "formula": "yfinance operatingMargins or EBIT/revenue",
+        "inputs": {
+          "operating_income": 2959.0,
+          "total_revenue": 15430.0
+        },
+        "key": "target_operating_margin",
+        "note": "Actual trailing operating margin = 31.6%",
+        "value": 0.31649
+      }
+    ],
+    "sustainable_growth_rate": 0.0363145600014,
+    "target_operating_margin": 0.31649,
+    "terminal_growth_rate": 0.035,
+    "tgr": 0.035,
+    "wacc": 0.04540393921428328
+  },
+  "WDS": {
+    "computation_log": "=================================================================\nDERIVED DCF ASSUMPTIONS \u2014 Computation Log\n=================================================================\n\n  [cost_of_debt_pretax] = 0.0189  (1.89%)\n    Formula:  interest_expense / total_debt\n    Inputs:   interest_expense=260.0000, total_debt=13722.0000\n    Note:     Interest expense $260M / Debt $13722M\n\n  [cost_of_debt_aftertax] = 0.0133  (1.33%)\n    Formula:  cost_of_debt_pre \u00d7 (1 \u2212 tax_rate)\n    Inputs:   cost_of_debt_pre=0.0189, tax_rate=0.3000\n\n  [beta] = 0.3000  (30.00%)\n    Formula:  yfinance .info['beta'] \u2192 adjusted\n    Inputs:   \n    Note:     Negative beta (-0.258) from yfinance \u2014 likely noise or short window; floored at 0.3 for CAPM\n\n  [cost_of_equity] = 0.0630  (6.30%)\n    Formula:  Rf + \u03b2 \u00d7 ERP\n    Inputs:   risk_free_rate=0.0430, beta=0.3000, equity_risk_premium=0.0550\n    Note:     Rf=4.3% (AU 10yr), ERP=5.5% (Damodaran) \u2014 floored from 5.9% to 6.3%\n\n  [equity_weight] = 0.8122  (81.22%)\n    Formula:  market_cap / (market_cap + total_debt)\n    Inputs:   market_cap=59.3333, total_debt=13.7220\n    Note:     MCap $59.3B, Debt $13.7B\n\n  [debt_weight] = 0.1878  (18.78%)\n    Formula:  total_debt / (market_cap + total_debt)\n    Inputs:   market_cap=59.3333, total_debt=13.7220\n\n  [wacc] = 0.0537  (5.37%)\n    Formula:  EquityWeight \u00d7 CostEquity + DebtWeight \u00d7 CostDebtAfterTax\n    Inputs:   equity_weight=0.8122, cost_of_equity=0.0630, debt_weight=0.1878, cost_of_debt_aftertax=0.0133\n\n  [return_on_equity] = 0.0720  (7.20%)\n    Formula:  yfinance .info['returnOnEquity'] or net_income/total_equity\n    Inputs:   net_income=2718.0000, total_equity=39843.0000\n\n  [payout_ratio] = 0.7490  (74.90%)\n    Formula:  yfinance .info['payoutRatio']\n    Inputs:   \n\n  [sustainable_growth_rate] = 0.0181  (1.81%)\n    Formula:  ROE \u00d7 (1 \u2212 payout_ratio)\n    Inputs:   roe=0.0720, payout_ratio=0.7490\n    Note:     Gordon Growth sustainable rate: how fast equity can grow from retained earnings\n\n  [terminal_growth_rate] = 0.0181  (1.81%)\n    Formula:  min(sustainable_growth_rate, gdp_ceiling)\n    Inputs:   sustainable_growth_rate=0.0181, gdp_ceiling=0.0350\n    Note:     SGR below GDP ceiling \u2014 no cap applied\n\n  [target_operating_margin] = 0.1908  (19.08%)\n    Formula:  yfinance operatingMargins or EBIT/revenue\n    Inputs:   operating_income=4536.0000, total_revenue=12984.0000\n    Note:     Actual trailing operating margin = 19.1%\n\n  \u2500\u2500 Result \u2500\u2500\n  WACC                = 0.0537  (5.37%)\n  Terminal Growth     = 0.0181  (1.81%)\n  Target Op. Margin   = 0.1908  (19.08%)\n  \u2500\u2500 Detail \u2500\u2500\n  Cost of Equity      = 0.0630  (6.30%)\n  Cost of Debt (pre)  = 0.0189  (1.89%)\n  Cost of Debt (post) = 0.0133  (1.33%)\n  Equity Weight       = 0.8122  (81.2%)\n  Debt Weight         = 0.1878  (18.8%)\n  Sustainable Growth  = 0.0181  (1.81%)\n=================================================================",
+    "computed_at": "2026-06-02 13:13 UTC",
+    "cost_of_debt_aftertax": 0.013263372686197348,
+    "cost_of_debt_pretax": 0.018947675265996212,
+    "cost_of_equity": 0.063,
+    "debt_weight": 0.18783023001897264,
+    "equity_weight": 0.8121697699810274,
+    "margin": 0.1908,
+    "sources": [
+      {
+        "formula": "interest_expense / total_debt",
+        "inputs": {
+          "interest_expense": 260.0,
+          "total_debt": 13722.0
+        },
+        "key": "cost_of_debt_pretax",
+        "note": "Interest expense $260M / Debt $13722M",
+        "value": 0.018947675265996212
+      },
+      {
+        "formula": "cost_of_debt_pre \u00d7 (1 \u2212 tax_rate)",
+        "inputs": {
+          "cost_of_debt_pre": 0.018947675265996212,
+          "tax_rate": 0.3
+        },
+        "key": "cost_of_debt_aftertax",
+        "note": "",
+        "value": 0.013263372686197348
+      },
+      {
+        "formula": "yfinance .info['beta'] \u2192 adjusted",
+        "inputs": {},
+        "key": "beta",
+        "note": "Negative beta (-0.258) from yfinance \u2014 likely noise or short window; floored at 0.3 for CAPM",
+        "value": 0.3
+      },
+      {
+        "formula": "Rf + \u03b2 \u00d7 ERP",
+        "inputs": {
+          "beta": 0.3,
+          "equity_risk_premium": 0.055,
+          "risk_free_rate": 0.043
+        },
+        "key": "cost_of_equity",
+        "note": "Rf=4.3% (AU 10yr), ERP=5.5% (Damodaran) \u2014 floored from 5.9% to 6.3%",
+        "value": 0.063
+      },
+      {
+        "formula": "market_cap / (market_cap + total_debt)",
+        "inputs": {
+          "market_cap": 59.333332992,
+          "total_debt": 13.722
+        },
+        "key": "equity_weight",
+        "note": "MCap $59.3B, Debt $13.7B",
+        "value": 0.8121697699810274
+      },
+      {
+        "formula": "total_debt / (market_cap + total_debt)",
+        "inputs": {
+          "market_cap": 59.333332992,
+          "total_debt": 13.722
+        },
+        "key": "debt_weight",
+        "note": "",
+        "value": 0.18783023001897264
+      },
+      {
+        "formula": "EquityWeight \u00d7 CostEquity + DebtWeight \u00d7 CostDebtAfterTax",
+        "inputs": {
+          "cost_of_debt_aftertax": 0.013263372686197348,
+          "cost_of_equity": 0.063,
+          "debt_weight": 0.18783023001897264,
+          "equity_weight": 0.8121697699810274
+        },
+        "key": "wacc",
+        "note": "",
+        "value": 0.05365795785128053
+      },
+      {
+        "formula": "yfinance .info['returnOnEquity'] or net_income/total_equity",
+        "inputs": {
+          "net_income": 2718.0,
+          "total_equity": 39843.0
+        },
+        "key": "return_on_equity",
+        "note": "",
+        "value": 0.07203
+      },
+      {
+        "formula": "yfinance .info['payoutRatio']",
+        "inputs": {},
+        "key": "payout_ratio",
+        "note": "",
+        "value": 0.749
+      },
+      {
+        "formula": "ROE \u00d7 (1 \u2212 payout_ratio)",
+        "inputs": {
+          "payout_ratio": 0.749,
+          "roe": 0.07203
+        },
+        "key": "sustainable_growth_rate",
+        "note": "Gordon Growth sustainable rate: how fast equity can grow from retained earnings",
+        "value": 0.01807953
+      },
+      {
+        "formula": "min(sustainable_growth_rate, gdp_ceiling)",
+        "inputs": {
+          "gdp_ceiling": 0.035,
+          "sustainable_growth_rate": 0.01807953
+        },
+        "key": "terminal_growth_rate",
+        "note": "SGR below GDP ceiling \u2014 no cap applied",
+        "value": 0.01807953
+      },
+      {
+        "formula": "yfinance operatingMargins or EBIT/revenue",
+        "inputs": {
+          "operating_income": 4536.0,
+          "total_revenue": 12984.0
+        },
+        "key": "target_operating_margin",
+        "note": "Actual trailing operating margin = 19.1%",
+        "value": 0.1908
+      }
+    ],
+    "sustainable_growth_rate": 0.01807953,
+    "target_operating_margin": 0.1908,
+    "terminal_growth_rate": 0.01807953,
+    "tgr": 0.01807953,
+    "wacc": 0.05365795785128053
+  }
+}

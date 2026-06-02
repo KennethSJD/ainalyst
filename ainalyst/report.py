@@ -114,6 +114,18 @@ _CSS = """
   .l-dcf::before{background:#2563eb}
   .l-comps::before{background:#7c3aed}
   .l-price::before{background:#1e293b}
+  @media(max-width:768px){
+    body{padding:1rem}
+    .grid-2,.grid-3{grid-template-columns:1fr}
+    table{font-size:.75em}
+    th,td{padding:.35em .4em}
+  }
+  @media print{
+    body{background:#fff;color:#000;max-width:100%}
+    .card{box-shadow:none;border:1px solid #ccc;page-break-inside:avoid}
+  }
+  .trend-up{color:#198754}.trend-down{color:#dc3545}
+  .trend-flat{color:#6c757d}
   footer{margin-top:3rem;text-align:center;color:var(--muted);font-size:.75rem}
 </style>
 """
@@ -424,6 +436,46 @@ class ReportBuilder:
         self._parts.append(h)
         return self
 
+    def add_historical_trends(self, snapshots: list[FundamentalSnapshot]) -> "ReportBuilder":
+        """Add a multi-year financial trend table from historical snapshots."""
+        if not snapshots:
+            return self
+        h = '<div class="card"><h2>Multi-Year Financial Trends</h2>'
+        h += '<div style="overflow-x:auto"><table><thead><tr>'
+        h += '<th>Metric</th>'
+        for s in snapshots:
+            h += f'<th>${s.total_revenue/1e6:,.0f}M rev</th>'
+        h += '</tr></thead><tbody>'
+
+        rows: list[tuple[str, list, bool]] = [
+            ("Revenue", [s.total_revenue for s in snapshots], True),
+            ("Gross Profit", [s.gross_profit for s in snapshots], True),
+            ("EBIT", [s.operating_income for s in snapshots], True),
+            ("EBITDA", [s.ebitda for s in snapshots], True),
+            ("Net Income", [s.net_income for s in snapshots], True),
+            ("Free Cash Flow", [s.free_cashflow for s in snapshots], True),
+            ("Total Assets", [s.total_assets for s in snapshots], True),
+            ("Total Debt", [s.total_debt for s in snapshots], True),
+            ("Gross Margin", [s.gross_margin for s in snapshots], False),
+            ("Operating Margin", [s.operating_margin for s in snapshots], False),
+            ("Net Margin", [s.net_margin for s in snapshots], False),
+            ("ROE", [s.roe for s in snapshots], False),
+        ]
+        for label, vals, is_currency in rows:
+            h += f'<tr><td style="font-weight:600">{label}</td>'
+            for v in vals:
+                if v is None:
+                    h += '<td>N/A</td>'
+                elif is_currency:
+                    h += f'<td>{_fmt_currency(v)}</td>'
+                else:
+                    cls = "trend-up" if (v or 0) > 0 else "trend-down" if (v or 0) < 0 else "trend-flat"
+                    h += f'<td class="{cls}">{_fmt_pct(v)}</td>'
+            h += '</tr>'
+        h += '</tbody></table></div></div>'
+        self._parts.append(h)
+        return self
+
     # ── Render ──────────────────────────────────────────────────────
 
     def render(self, title: str = "Ainalyst Equity Research Report") -> str:
@@ -487,7 +539,9 @@ def generate_full_report(
     dcf: DCFResult | None = None,
     comps: CompsResult | None = None,
     sector: SectorSummary | None = None,
+    historical: list[FundamentalSnapshot] | None = None,
     output_path: str | Path = "report.html",
+    output_csv: str | Path | None = None,
 ) -> Path:
     """Build and save a complete equity research report."""
     rb = ReportBuilder()
@@ -495,6 +549,8 @@ def generate_full_report(
     rb.add_executive_summary(snap, dcf=dcf, comps=comps)
     rb.add_financial_snapshot(snap)
     rb.add_football_field(snap.current_price, dcf=dcf, comps=comps)
+    if historical:
+        rb.add_historical_trends(historical)
     if dcf:
         rb.add_dcf_detail(dcf)
     if comps:
@@ -503,4 +559,27 @@ def generate_full_report(
         rb.add_sector_summary(sector)
     rb.add_assumptions(dcf=dcf, comps=comps)
     title = f"Ainalyst — {snap.company_name} ({snap.ticker})"
+
+    # Write CSV if requested
+    if output_csv:
+        import csv
+        from io import StringIO
+        d = snap.to_dict()
+        if dcf:
+            d["dcf_intrinsic"] = dcf.intrinsic_per_share
+            d["dcf_mos"] = dcf.margin_of_safety_pct
+            d["dcf_signal"] = dcf.valuation_signal
+        if comps:
+            d["comps_composite"] = comps.composite_value
+            d["comps_mos"] = comps.margin_of_safety_pct
+            d["comps_signal"] = comps.valuation_signal
+        csv_path = Path(output_csv)
+        csv_path.parent.mkdir(parents=True, exist_ok=True)
+        buf = StringIO()
+        writer = csv.DictWriter(buf, fieldnames=list(d.keys()))
+        writer.writeheader()
+        writer.writerow(d)
+        csv_path.write_text(buf.getvalue(), encoding="utf-8")
+        log.info("CSV saved to %s", csv_path)
+
     return rb.save(output_path, title=title)

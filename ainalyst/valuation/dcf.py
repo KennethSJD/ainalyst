@@ -74,7 +74,13 @@ class DCFModel:
         """Execute the DCF and return a :class:`DCFResult`."""
         base_revenue = snap.total_revenue
         if base_revenue <= 0:
-            raise ValueError(f"Cannot run DCF: {snap.ticker} has non-positive revenue ({base_revenue})")
+            raise ValueError(
+                f"Cannot run DCF: {snap.ticker} has non-positive revenue ({base_revenue})"
+            )
+        if snap.shares_outstanding <= 0:
+            raise ValueError(
+                f"Cannot run DCF: {snap.ticker} has zero shares outstanding"
+            )
 
         # ── 1. Project Free Cash Flows ──────────────────────────────
         growth_rates = self._pad_growth_rates()
@@ -87,9 +93,14 @@ class DCFModel:
             nopat = ebit * (1 - self.a.tax_rate)
             capex = revenue * self.a.capex_pct_revenue
             delta_nwc = revenue * self.a.delta_nwc_pct_revenue
-            # Add back depreciation (approximate as fraction of capex)
-            depreciation = capex * 0.8
-            fcf = nopat + depreciation - capex - delta_nwc
+            # Use actual D&A from financials where available, else ratio to revenue
+            if snap.depreciation > 0:
+                d_and_a = snap.depreciation
+            elif snap.total_revenue > 0:
+                d_and_a = revenue * (snap.depreciation / snap.total_revenue) if snap.depreciation > 0 else capex * 0.8
+            else:
+                d_and_a = capex * 0.8
+            fcf = nopat + d_and_a - capex - delta_nwc
             projected_fcf.append(fcf)
 
         # ── 2. Discount factors & PV of projection period ───────────

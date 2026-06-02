@@ -74,6 +74,7 @@ class CompsModel:
         self,
         target: FundamentalSnapshot,
         peer_tickers: list[str] | None = None,
+        market_cap_filter: float | None = None,
     ) -> CompsResult:
         """Run the comps analysis.
 
@@ -83,6 +84,9 @@ class CompsModel:
             The company being valued.
         peer_tickers : list[str] | None
             Explicit peer symbols.  Falls back to sector defaults.
+        market_cap_filter : float | None
+            If set, only keep peers within ±50%% of the target's market cap.
+            Value represents the tolerance (default 0.5 = ±50%%).
         """
         # Resolve peers
         if peer_tickers is None:
@@ -99,6 +103,22 @@ class CompsModel:
         # Build peer snapshots
         peer_objs = fetch_tickers(peer_tickers)
         peer_snaps = build_snapshots(peer_objs)
+
+        # Apply market cap filtering
+        if market_cap_filter is not None and target.market_cap:
+            lo = target.market_cap * (1 - market_cap_filter)
+            hi = target.market_cap * (1 + market_cap_filter)
+            before = len(peer_snaps)
+            peer_snaps = [
+                s for s in peer_snaps
+                if s.market_cap and lo <= s.market_cap <= hi
+            ]
+            log.info(
+                "Market-cap filter (±%.0f%%): kept %d/%d peers",
+                market_cap_filter * 100,
+                len(peer_snaps),
+                before,
+            )
 
         # Assemble peer table
         rows: list[dict[str, Any]] = []

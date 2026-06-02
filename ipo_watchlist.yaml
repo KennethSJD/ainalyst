@@ -1,0 +1,45 @@
+# ──────────────────────────────────────────────────────────────────────
+# Ainalyst IPO Watchlist
+# ──────────────────────────────────────────────────────────────────────
+#
+# Manually curated list of upcoming, rumoured, or recently listed ASX IPOs
+# that may not yet be discoverable via Yahoo Finance's firstTradeDate.
+#
+# status: upcoming | rumoured | listed | withdrawn
+#
+# Sources for upcoming ASX IPOs:
+#   - ASX announcements:  https://www.asx.com.au/listings/upcoming-floats
+#   - SmallCaps:          https://smallcaps.com.au/upcoming-ipos/
+#   - Market Index:       https://www.marketindex.com.au/upcoming-ipos
+#
+# To add an entry, copy the template below and fill in known fields.
+# Fields with ~ (null) are optional and will be skipped gracefully.
+#
+# ──── Template ────
+# - ticker: XYZ
+#   company_name: "Example Corp"
+#   sector: "Information Technology"
+#   expected_date: "2026-07-01"   # best estimate
+#   ipo_price: ~                  # stated offer price (null if unknown)
+#   status: upcoming              # upcoming | rumoured | listed | withdrawn
+#   notes: "Raising $50M at $2.00/share. Lead manager: Macquarie."
+# ──────────────────
+
+ipos:
+  # ── Example entries (replace with your own research) ──────────────
+
+  # - ticker: ABC
+  #   company_name: "ABC Holdings Ltd"
+  #   sector: "Financials"
+  #   expected_date: "2026-07-15"
+  #   ipo_price: 1.50
+  #   status: upcoming
+  #   notes: "Raising $30M. Fintech lending platform."
+
+  # - ticker: TBD
+  #   company_name: "Rumoured Mining Co"
+  #   sector: "Materials"
+  #   expected_date: "2026-09-01"
+  #   ipo_price: ~
+  #   status: rumoured
+  #   notes: "Press reports suggest H2 2026 listing."
