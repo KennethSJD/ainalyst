@@ -1,0 +1,42 @@
+# ── Generated reports (personal analysis runs) ──────────────────────
+reports/*
+!reports/examples/
+!reports/examples
+# ── Python build & cache artefacts ───────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# ── Virtual environments ──────────────────────────────────────────────
+venv/
+.venv/
+env/
+.env/
+
+# ── Secrets & local config ────────────────────────────────────────────
+.env
+.env.*
+*.env
+secrets.toml
+config.local.*
+
+# ── Test / coverage cache ─────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# ── Editor & OS noise ─────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace

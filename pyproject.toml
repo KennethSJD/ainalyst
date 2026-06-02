@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ainalyst"
+version = "0.1.0"
+description = "ASX company valuation engine — DCF, Trading Comps, and Sector Analysis"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "ainalyst contributors"}]
+
+dependencies = [
+    "yfinance>=0.2.31",
+    "pandas>=2.0",
+    "numpy>=1.24",
+    "requests>=2.31",
+    "jinja2>=3.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "ruff>=0.1",
+]
+
+[project.scripts]
+ainalyst = "ainalyst.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["ainalyst*"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
